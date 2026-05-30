@@ -323,3 +323,4 @@ After deploy, open:
 https://your-backend-name.onrender.com/api/health
 https://your-backend-name.onrender.com/api-docs
 ```
+Swagger UI is available at /api-docs.
