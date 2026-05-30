@@ -1,0 +1,595 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Flora Backend API",
+    "version": "1.0.0",
+    "description": "REST API for Flora bouquets with PostgreSQL, Sequelize, Multer and Swagger"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Server status"
+    },
+    {
+      "name": "Bouquets",
+      "description": "Bouquets CRUD, favorite status and photo upload"
+    },
+    {
+      "name": "Collections",
+      "description": "Static Flora collections for frontend sections"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Check server status",
+        "responses": {
+          "200": {
+            "description": "Server is running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/flowers": {
+      "get": {
+        "tags": ["Collections"],
+        "summary": "Get flowers collection",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/LimitParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Flowers collection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feedback": {
+      "get": {
+        "tags": ["Collections"],
+        "summary": "Get feedback collection",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/LimitParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback collection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bouquets": {
+      "get": {
+        "tags": ["Bouquets"],
+        "summary": "Get bouquets with pagination and search",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/LimitParam"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "rose"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["oldest", "newest"]
+            },
+            "example": "oldest"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bouquets list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BouquetsListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Bouquets"],
+        "summary": "Create bouquet",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BouquetCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bouquet created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bouquet"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/bouquets/{bouquetId}": {
+      "get": {
+        "tags": ["Bouquets"],
+        "summary": "Get bouquet by id",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BouquetIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bouquet found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bouquet"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Bouquets"],
+        "summary": "Update bouquet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BouquetIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BouquetUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bouquet updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bouquet"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Bouquets"],
+        "summary": "Delete bouquet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BouquetIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bouquet deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bouquet"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/bouquets/{bouquetId}/favorite": {
+      "patch": {
+        "tags": ["Bouquets"],
+        "summary": "Update bouquet favorite status",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BouquetIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FavoriteUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Favorite status updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bouquet"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/bouquets/{bouquetId}/photo": {
+      "patch": {
+        "tags": ["Bouquets"],
+        "summary": "Upload bouquet photo",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BouquetIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["photo"],
+                "properties": {
+                  "photo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Photo uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bouquet"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "BouquetIdParam": {
+        "name": "bouquetId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        },
+        "example": 1
+      },
+      "PageParam": {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "default": 1
+        },
+        "example": 1
+      },
+      "LimitParam": {
+        "name": "limit",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "default": 15
+        },
+        "example": 15
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok"
+          },
+          "project": {
+            "type": "string",
+            "example": "flora_backend"
+          }
+        }
+      },
+      "Bouquet": {
+        "type": "object",
+        "required": ["id", "photoURL", "title", "description", "price", "favorite"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "photoURL": {
+            "type": "string",
+            "example": "/photos/bouquet-1.jpg"
+          },
+          "photo": {
+            "type": "string",
+            "example": "/photos/bouquet-1.jpg"
+          },
+          "image": {
+            "type": "string",
+            "example": "/photos/bouquet-1.jpg"
+          },
+          "image2x": {
+            "type": "string",
+            "example": "/photos/bouquet-1.jpg"
+          },
+          "alt": {
+            "type": "string",
+            "example": "Peach Meadow bouquet"
+          },
+          "title": {
+            "type": "string",
+            "example": "Peach Meadow"
+          },
+          "description": {
+            "type": "string",
+            "example": "A soft and radiant arrangement of peach and blush roses."
+          },
+          "price": {
+            "type": "string",
+            "example": "$55"
+          },
+          "favorite": {
+            "type": "boolean",
+            "example": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BouquetCreate": {
+        "type": "object",
+        "required": ["title", "description", "price"],
+        "properties": {
+          "photoURL": {
+            "type": "string",
+            "example": "./images/peach_meadow.jpg"
+          },
+          "image2x": {
+            "type": "string",
+            "example": "./images/peach_meadow@2x.jpg"
+          },
+          "alt": {
+            "type": "string",
+            "example": "Peach Meadow bouquet"
+          },
+          "title": {
+            "type": "string",
+            "example": "Peach Meadow"
+          },
+          "description": {
+            "type": "string",
+            "example": "A soft and radiant arrangement of peach and blush roses."
+          },
+          "price": {
+            "type": "string",
+            "example": "$55"
+          },
+          "favorite": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "BouquetUpdate": {
+        "type": "object",
+        "properties": {
+          "photoURL": {
+            "type": "string"
+          },
+          "image2x": {
+            "type": "string"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          },
+          "favorite": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FavoriteUpdate": {
+        "type": "object",
+        "required": ["favorite"],
+        "properties": {
+          "favorite": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "BouquetsListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bouquet"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "example": 16
+          },
+          "page": {
+            "type": "integer",
+            "example": 1
+          },
+          "perPage": {
+            "type": "integer",
+            "example": 15
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 2
+          }
+        }
+      },
+      "CollectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "perPage": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Not found"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  }
+}
