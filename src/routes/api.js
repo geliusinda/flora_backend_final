@@ -1,6 +1,7 @@
 const express = require("express");
 const createCollectionRouter = require("./collectionsRoutes");
 const bouquetsRouter = require("./bouquetsRoutes");
+const ordersRouter = require("./ordersRoutes");
 
 const router = express.Router();
 
@@ -11,5 +12,6 @@ router.get("/health", (req, res) => {
 router.use("/flowers", createCollectionRouter("flowers"));
 router.use("/bouquets", bouquetsRouter);
 router.use("/feedback", createCollectionRouter("feedback"));
+router.use("/orders", ordersRouter);
 
 module.exports = router;
